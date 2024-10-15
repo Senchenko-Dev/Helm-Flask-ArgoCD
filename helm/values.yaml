@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+  repository: "95.163.228.20:5000/flask_app"  # Имя образа без префикса
+  tag: "1.0"             # Тег образа
+  pullPolicy: IfNotPresent  # Политика извлечения образа
+
+service:
+  name: "flask-flask-app"
+  type: NodePort 
+  port: 5000    # порт на котором приложение работает внктри k8s
+  nodePort: 30000   # Порт, на котором будет доступно приложение
+
+namespace: default
+
+selector:
+  app: flask-flask-app
+
+containerPort: 80 
