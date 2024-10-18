@@ -1,0 +1,13 @@
+
+stages:          # List of stages for jobs, and their order of execution
+  - update
+
+
+update-job:       # This job runs in the build stage, which runs first.
+  stage: update
+  script:
+    - "argocd login 193.227.241.96:30800 --username admin --password 'L0WAJ-K10bQPSGiL' --insecure"
+    - "argocd app sync argocd/app"
+    - echo "Update complete."
+
+
