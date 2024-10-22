@@ -1,13 +1,69 @@
+stages:
+  - build
+  - push
+  - update_repo
+  - deploy
 
-stages:          # List of stages for jobs, and their order of execution
-  - update
+variables:
+  NAME: flask_app_nikita
+  IMAGE_NAME: "95.163.228.20:5000/$NAME"
+  TAG: "2.0"
+  MY_MULTILINE_VAR: |
+    replicaCount: 1
+
+    image:
+      repository: $IMAGE_NAME  # Имя образа без префикса
+      tag: $TAG             # Тег образа
+      pullPolicy: IfNotPresent  # Политика извлечения образа
+
+    service:
+      name: "flask-flask-app"
+      type: NodePort
+      port: 5000    # порт на котором приложение работает внктри k8s
+      nodePort: 30000   # Порт, на котором будет доступно приложение
+
+    namespace: default
+
+    selector:
+      app: flask-flask-app
 
 
-update-job:       # This job runs in the build stage, which runs first.
-  stage: update
+build_image:
+  stage: build
   script:
-    - "argocd login 193.227.241.96:30800 --username admin --password 'L0WAJ-K10bQPSGiL' --insecure"
-    - "argocd app sync argocd/app"
-    - echo "Update complete."
+    - echo "Building Docker image with tag"
+    - docker build -t $NAME:$TAG .
 
 
+push_image:
+  stage: push
+  script:
+    - echo "Tagging Docker image for registry"
+    - docker tag $NAME:$TAG $IMAGE_NAME:$TAG
+    - echo "Pushing Docker image to registry"
+    - docker push $IMAGE_NAME:$TAG
+
+
+update_repo:
+  stage: update_repo
+  script:
+    - echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
+    - source ~/.bashrc
+    - echo "$MY_MULTILINE_VAR" > helm/values.yaml
+    - cat helm/values.yaml
+    - echo "Updating values.yaml with new image repository and tag"
+    - echo "Committing changes to values.yaml"
+    - git config --list
+    - git config --global user.name "Senchenko Nikita"
+    - git config --global user.email "nikitos.senchenko@yandex.ru"
+    - git add .
+    - git commit -m "Update image tag to $TAG"
+    - git remote set-url origin http://root:ACCESS_TOKEN@193.227.241.243/root/test-app.git
+    - git push origin HEAD:main
+
+
+deploy:
+  stage: deploy
+  script:
+    - argocd login 193.227.241.96:30800 --username admin --password 'PASSOWRD' --insecure
+    - argocd app create app --repo http://193.227.241.243/root/test-app.git --path helm --sync-policy automatic --dest-server https://kubernetes.default.svc --dest-namespace default --values values.yaml
