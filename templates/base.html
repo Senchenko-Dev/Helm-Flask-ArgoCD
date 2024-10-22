@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пример HTML-страницы</title>
+    <title>{% block title %}It Pro.com{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <header>
-        <h1>Добро пожаловать на мою страницу!</h1>
+        <h1>{% block header %}Добро пожаловать на сайт It Pro!{% endblock %}</h1>
         <nav>
             <ul>
                 <li><a href="#about">О нас</a></li>
@@ -19,6 +19,8 @@
     </header>
 
     <main>
+        {% block content %}
+
         <section id="about">
             <h2>О нас</h2>
             <p>Мы предоставляем лучшие услуги в своей области.</p>
@@ -35,12 +37,15 @@
 
         <section id="contact">
             <h2>Контакты</h2>
-            <p>Вы можете связаться с нами по электронной почте: example@example.com</p>
+	    <p>Вы можете связаться с нами по электронной почте: {{ email }}</p>
         </section>
+
+        {% endblock %}
     </main>
 
     <footer>
-        <p>&copy; 2023 Моя компания. Все права защищены.</p>
+        <p>&copy; {{ year }} Моя компания. Все права защищены.</p>
     </footer>
 </body>
 </html>
+
