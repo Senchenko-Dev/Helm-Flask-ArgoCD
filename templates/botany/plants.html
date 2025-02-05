@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Вторая страница{% endblock %}
+
+{% block header %}Добро пожаловать на воторую страницу!{% endblock %}
+
+{% block content %}
+<section id="about">
+    <h2>О нас</h2>
+    <p>Мы предоставляем лучшие услуги в своей области.</p>
+</section>
+
+<section id="services">
+    <h2>Услуги</h2>
+    <ul>
+        <li>Услуга 1</li>
+        <li>Услуга 2</li>
+        <li>Услуга 3</li>
+    </ul>
+</section>
+
+<section id="contact">
+    <h2>Контакты</h2>
+    <p>Вы можете связаться с нами по электронной почте: {{ email }} </p>
+</section>
+{% endblock %}
+

@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background: #35424a;
+    color: #ffffff;
+    padding: 20px;
+    display: flex; /* Используем flexbox для выравнивания содержимого */
+    align-items: center; /* Выравнивание по центру по вертикали */
+}
+
+header img {
+    margin-right: 20px; /* Отступ справа от изображения */
+    height: 70px; /* Высота изображения (можно изменить) */
+    border: 2px solid #ffffff; /* Обводка вокруг логотипа */
+    border-radius: 5px; /* Закругленные углы для обводки */
+    padding: 5px; /* Отступ внутри обводки */
+    background-color: #35424a; /* Цвет фона для выделения логотипа */
+}
+
+header h1 {
+    margin-top: 10px; /* Отступ сверху для заголовка */
+    margin-bottom: 0; /* Убираем нижний отступ */
+}
+
+nav {
+    text-align: center; /* Центрируем навигацию */
+    margin-top: 10px; /* Отступ сверху для навигации */
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 15px; /* Отступы для кнопок */
+    background-color: #5a5a5a; /* Цвет фона кнопок */
+    border-radius: 5px; /* Закругленные углы */
+    transition: background-color 0.3s; /* Плавный переход цвета */
+}
+
+nav ul li a:hover {
+    background-color: #777; /* Цвет фона при наведении */
+}
+
+main {
+    padding: 20px;
+}
+
+section {
+    background: #ffffff;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background: #35424a;
+    color: #ffffff;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Дополнительные стили для улучшения внешнего вида */
+h2 {
+    color: #35424a; /* Цвет заголовков секций */
+}
+
+p {
+    margin: 10px 0; /* Отступы для абзацев */
+}

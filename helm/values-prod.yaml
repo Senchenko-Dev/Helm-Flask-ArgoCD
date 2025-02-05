@@ -1,0 +1,34 @@
+replicaCount: 1
+
+image:
+  repository: 193.227.241.38:5000/flask-app-nikita  # Имя образа без префикса
+  tag: 8.0             # Тег образа
+  pullPolicy: IfNotPresent   # Политика извлечения образа
+
+service:
+  name: flask-app-nikita-prod
+  type: NodePort
+  port: 5000                # порт на котором приложение работает внутри k8s
+  nodePort: 30900        # Порт, на котором будет доступно приложение
+
+namespace: prod
+
+selector:
+  app: flask-app-nikita-prod
+
+containerPort: 5000
+
+strategy:
+  type: RollingUpdate  # Тип стратегии развертывания
+  rollingUpdate:
+    maxUnavailable: 1  # Максимальное количество недоступных подов
+    maxSurge: 1        # Максимальное количество дополнительных подов
+
+resources:
+  requests:
+    cpu: "250m"        # Запрашиваемые ресурсы CPU
+    memory: "512Mi"    # Запрашиваемые ресурсы памяти
+  limits:
+    cpu: "500m"        # Ограниченные ресурсы CPU
+    memory: "1Gi"      # Ограниченные ресурсы памяти
+

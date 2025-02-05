@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}It Pro.com{% endblock %}</title>
+    <link type="image/png" sizes="32x32" rel="icon" href="{{ url_for('load_img', img='icons8-сетка-24.png') }}" type="image/x-icon"> <!-- Добавлено для favicon -->
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('load_img', img='itpro.PNG') }}" alt="Логотип" />
+        <h1>{% block header %}Добро пожаловать на сайт It Pro!{% endblock %}</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a class="button" href="#about">О нас</a></li>
+            <li><a class="button" href="#services">Услуги</a></li>
+            <li><a class="button" href="#contact">Контакты</a></li>
+            <li><a class="button" href="#contact">ФАffК</a></li>
+        </ul>
+    </nav>
+    <main>
+        {% block content %}
+        <section id="about">
+            <h2>О нас</h2>
+            <p>Мы предоставляем лучшие услуги в своей области.</p>
+        </section>
+
+        <section id="services">
+            <h2>Услуги</h2>
+            <ul>
+                <li>Услуга 1</li>
+                <li>Услуга 2</li>
+                <li>Услуга 3</li>
+            </ul>
+        </section>
+        <section id="contact">
+            <h2>Контакты</h2>
+            <p>Вы можете связаться с нами по электронной почте: {{ email }}</p>
+        </section>
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; {{ year }} Моя компания. Все права защищены.</p>
+    </footer>
+</body>
+</html>

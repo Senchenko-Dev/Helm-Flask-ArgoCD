@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.selector.app }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.selector.app }}
+  strategy:
+    type: {{ .Values.strategy.type }}  # Добавляем стратегию развертывания
+    rollingUpdate:
+      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable }}  # Максимальное количество недоступных подов
+      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge }}  # Максимальное количество дополнительных подов
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.selector.app }}
+    spec:
+      containers:
+        - name: flask-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          resources:  # ресурсы
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}  # Запрашиваемые ресурсы
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}  # Ограниченные ресурсы
+              memory: {{ .Values.resources.limits.memory }}
+
