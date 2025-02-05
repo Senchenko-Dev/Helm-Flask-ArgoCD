@@ -1,0 +1,201 @@
+stages:
+  - deploy-dev
+  - deploy-prod
+  
+variables:
+  NEW_TAG:
+    description: "Укажите tag образа"
+    
+  NAME_PROJECT: test
+  NAME: flask-app-nikita
+  HOST: 89.111.154.120
+  PORT_ARGOCD: 30800
+  IMAGE_NAME: "193.227.241.38:5000/$NAME"
+  REPOSITORIES: http://89.104.71.220/root/test.git
+  REPOSITORIES_US: root
+  REPOSITORIES_PASS: SenchenkoNikita123qwe123
+  USERNAME_ARGOCD: admin
+  PASSOWRD_ARGOCD: '123qwe123'
+  
+  
+
+deploy-dev:
+  stage: deploy-dev
+  variables:
+    NAME_APP: app-dev
+    ENV_NAME: dev
+    NAMESPACE: dev
+    PORT_FLASK: 5000
+    NODEPORT: 30100
+  before_script:
+  - echo "Cleaning up workspace..."
+  - rm -rf *
+  script:
+    - CURRENT_DIR=$(pwd)
+    - echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
+    - source ~/.bashrc
+    - sudo usermod -aG docker gitlab-runner
+    - ssh-keyscan -t rsa 89.104.71.220 >> ~/.ssh/known_hosts   
+ 
+    # git clone
+    - git clone -b dev git@89.104.71.220:root/test.git
+
+    # переходим по пути
+    - cd "$CURRENT_DIR/$NAME_PROJECT"
+
+    # берем текущей tag
+    - TAG=$(grep 'tag:' helm/values-dev.yaml | awk '{print $2}')
+
+    # Увеличиваем текущий тег на 1
+    - NEW_TAG=$(echo "$TAG + 1" | bc)
+    - echo "New TAG $NEW_TAG"
+ 
+    # билдим images
+    - echo "Building Docker image with tag"
+    - sudo docker build -t $NAME:$NEW_TAG .
+    
+    # ставми tag
+    - echo "Tagging Docker image for registry"
+    - sudo docker tag $NAME:$NEW_TAG $IMAGE_NAME:$NEW_TAG
+    
+    # пушим в локальный режестри
+    - echo "Pushing Docker image to registry"
+    - sudo docker push $IMAGE_NAME:$NEW_TAG
+    
+    - |
+      cat <<EOF > helm/values-dev.yaml
+      replicaCount: 1
+
+      image:
+        repository: $IMAGE_NAME  # Имя образа без префикса
+        tag: $NEW_TAG             # Тег образа
+        pullPolicy: IfNotPresent   # Политика извлечения образа
+
+      service:
+        name: $NAME-$ENV_NAME
+        type: NodePort
+        port: $PORT_FLASK                # порт на котором приложение работает внутри k8s
+        nodePort: $NODEPORT        # Порт, на котором будет доступно приложение
+
+      namespace: $NAMESPACE
+
+      selector:
+        app: $NAME-$ENV_NAME
+
+      containerPort: $PORT_FLASK
+
+      strategy:
+        type: RollingUpdate  # Тип стратегии развертывания
+        rollingUpdate:
+          maxUnavailable: 1  # Максимальное количество недоступных подов
+          maxSurge: 1        # Максимальное количество дополнительных подов
+
+      resources:
+        requests:
+          cpu: "250m"        # Запрашиваемые ресурсы CPU
+          memory: "512Mi"    # Запрашиваемые ресурсы памяти
+        limits:
+          cpu: "500m"        # Ограниченные ресурсы CPU
+          memory: "1Gi"      # Ограниченные ресурсы памяти
+
+      EOF
+    
+    #коммит и пуш (обновляем файл)
+    - git checkout dev
+    - echo "Committing changes to values-dev.yaml"
+    - git config --global user.name "Senchenko Nikita"
+    - git config --global user.email "nikitos.senchenko@yandex.ru"
+    - git add .
+    - git commit -m "Update image tag to $NEW_TAG"
+    - git remote set-url origin http://root:glpat-Nu3wPrtvQKRoWbgVugFk@89.104.71.220/root/test.git
+     # Пуш изменений в удаленную ветку dev
+    - git push origin HEAD:dev
+
+
+    #создание приложения в ArgoCD
+    - chmod 0600 /home/gitlab-runner/.config/argocd/config
+    - argocd login $HOST:$PORT_ARGOCD --username $USERNAME_ARGOCD --password $PASSOWRD_ARGOCD --insecure
+    - argocd repo add $REPOSITORIES --username $REPOSITORIES_US --password $REPOSITORIES_PASS
+    - argocd app create $NAME_APP --repo $REPOSITORIES --path helm --sync-policy automatic --dest-server https://kubernetes.default.svc --dest-namespace $NAMESPACE --values values-dev.yaml --upsert
+    - argocd app set $NAME_APP --parameter image.repository=$IMAGE_NAME --parameter image.tag=$NEW_TAG 
+    - 'echo Avalidle for socket: http://$HOST:$NODEPORT'
+  rules:
+    - changes:
+        - helm/values-dev.yaml  
+        - .gitlab-ci.yml
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: always
+
+
+deploy-prod:
+  stage: deploy-prod
+  variables:
+    NAME_APP: app-prod
+    ENV_NAME: prod
+    NAMESPACE: prod
+    PORT_FLASK: 5000
+    NODEPORT: 30900
+    NEW_TAG: "" 
+  script:
+    - echo "Deploy to PROD..."
+    - echo "NEW_TAG is set to --> $NEW_TAG"
+    
+    - |
+      cat <<EOF > helm/values-prod.yaml
+      replicaCount: 1
+
+      image:
+        repository: $IMAGE_NAME  # Имя образа без префикса
+        tag: $NEW_TAG             # Тег образа
+        pullPolicy: IfNotPresent   # Политика извлечения образа
+
+      service:
+        name: $NAME-$ENV_NAME
+        type: NodePort
+        port: $PORT_FLASK                # порт на котором приложение работает внутри k8s
+        nodePort: $NODEPORT        # Порт, на котором будет доступно приложение
+
+      namespace: $NAMESPACE
+
+      selector:
+        app: $NAME-$ENV_NAME
+
+      containerPort: $PORT_FLASK
+
+      strategy:
+        type: RollingUpdate  # Тип стратегии развертывания
+        rollingUpdate:
+          maxUnavailable: 1  # Максимальное количество недоступных подов
+          maxSurge: 1        # Максимальное количество дополнительных подов
+
+      resources:
+        requests:
+          cpu: "250m"        # Запрашиваемые ресурсы CPU
+          memory: "512Mi"    # Запрашиваемые ресурсы памяти
+        limits:
+          cpu: "500m"        # Ограниченные ресурсы CPU
+          memory: "1Gi"      # Ограниченные ресурсы памяти
+
+      EOF
+    
+    #коммит и пуш (обновляем файл)
+    - echo "Committing changes to values-prod.yaml"
+    - git config --global user.name "Senchenko Nikita"
+    - git config --global user.email "nikitos.senchenko@yandex.ru"
+    - git add .
+    - git commit -m "Update image tag to $NEW_TAG"
+    - git remote set-url origin http://root:glpat-Nu3wPrtvQKRoWbgVugFk@89.104.71.220/root/test.git
+    - git push origin HEAD:main
+
+
+    #создание приложения в ArgoCD
+    - chmod 0600 /home/gitlab-runner/.config/argocd/config
+    - argocd login $HOST:$PORT_ARGOCD --username $USERNAME_ARGOCD --password $PASSOWRD_ARGOCD --insecure
+    - argocd repo add $REPOSITORIES --username $REPOSITORIES_US --password $REPOSITORIES_PASS
+    - argocd app create $NAME_APP --repo $REPOSITORIES --path helm --sync-policy automatic --dest-server https://kubernetes.default.svc --dest-namespace $NAMESPACE --values values-prod.yaml --upsert
+    - argocd app set $NAME_APP --parameter image.repository=$IMAGE_NAME --parameter image.tag=$NEW_TAG   
+    - 'echo Avalidle for socket: http://$HOST:$NODEPORT'
+  rules:
+    - when: manual
+ 
