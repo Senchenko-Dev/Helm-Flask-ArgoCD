@@ -11,15 +11,15 @@
 
 ## Архитектура
 
-В Gitlab CI есть две ветки main и dev </br>
-в dev ведется разработка приложения и тестирование
-в main сливается из dev ветки код который будет раскатан в прод
+В Gitlab CI есть две ветки main и dev. </br>
+В dev ведется разработка приложения и тестирование </br>
+в main сливается из dev ветки код который будет раскатан в прод </br>
 
 docker regystry служит для локльаного хранения images
 
-в k3s и ArgoCD проиcходит деплой в разные namespace 
-для ветки dev создается namesapce с имменем dev
-для ветки main создается  namesapce с имменем prod
+в k3s и ArgoCD проиcходит деплой в разные namespace. </br>
+Для ветки dev создается namesapce с имменем dev. </br>
+Для ветки main создается  namesapce с имменем prod. </br> 
 
 ```
 В Gitlab CI есть две ветки main и dev
