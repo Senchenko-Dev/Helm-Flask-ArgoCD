@@ -9,13 +9,18 @@
 2. docker regystry
 3. k3s-ArgoCD
 
-## 
+## Архитектура
 
 ```
-cd existing_repo
-git remote add origin http://89.104.71.220/root/test.git
-git branch -M main
-git push -uf origin main
+В Gitlab CI есть две ветки main и dev
+в dev ведется разработка приложения и тестирование
+в main сливается из dev в main ветку код который будет раскатан в прод
+
+docker regystry служит для локльаного хранения images
+
+в k3s и ArgoCD проиcходит деплой в разные namespace 
+для ветки dev создается namesapce с имменем dev
+для ветки main создается  namesapce с имменем prod
 ```
 
 ## Integrate with your tools
