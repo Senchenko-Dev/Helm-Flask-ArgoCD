@@ -15,10 +15,10 @@
 В dev ведется разработка приложения и тестирование,
 а в main сливается из dev ветки, код который будет раскатан в прод. </br>
 
-docker regystry служит для локльаного хранения images
+docker regystry служит для локльаного хранения images.
 
-в k3s и ArgoCD проиcходит деплой в разные namespace. </br>
-Для ветки dev создается namesapce с имменем dev. </br>
+В k3s и ArgoCD проиcходит деплой в разные namespace.
+Для ветки dev создается namesapce с имменем dev.
 Для ветки main создается  namesapce с имменем prod. </br> 
 
 ```
